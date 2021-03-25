@@ -6,7 +6,7 @@
 ```
 docker build -t supermarket-api .
 ```
-- Run the container
+- Run the container in the background
 ```
 docker run -p 8080:8080 -d supermarket-api
 ```

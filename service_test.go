@@ -4,7 +4,7 @@ import "testing"
 
 func TestGetHello(t *testing.T) {
 	expected := "Hello"
-	actual := GetHello()
+	actual := getHello()
 	if expected != actual {
 		t.Fatalf(`GetHello() = %q, want match for %#q`, actual, expected)
 	}
