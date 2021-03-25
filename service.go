@@ -1,9 +1,5 @@
 package main
 
-func getHello() string {
-	return "Hello world!"
-}
-
 func getItems() *ItemList {
 	items := fetch()
 	list := &ItemList{}
