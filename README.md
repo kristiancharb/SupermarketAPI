@@ -10,6 +10,10 @@ docker build -t supermarket-api .
 ```
 docker run -p 8080:8080 -d supermarket-api
 ```
+- Run the container in the foreground
+```
+docker run -p 8080:8080 -it supermarket-api
+```
 
 ## Running tests
 Build the testing container
