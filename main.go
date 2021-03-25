@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/render"
 )
 
 func main() {
@@ -16,20 +16,23 @@ func main() {
 	router.Route("/items", func(router chi.Router) {
 		router.Post("/", handleNewItems)
 		router.Get("/", handleGetItems)
-		router.Delete("/", handleDeleteItem)
+		router.Delete("/{code}", handleDeleteItem)
 	})
 
 	http.ListenAndServe(":8080", router)
 }
 
 func handleNewItems(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "New items")
+	items := &ItemList{}
+	render.Bind(r, items)
+	addItems(items)
 }
 
 func handleGetItems(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Get items")
+	render.Render(w, r, getItems())
 }
 
 func handleDeleteItem(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Delete item")
+	code := chi.URLParam(r, "code")
+	deleteItem(code)
 }
