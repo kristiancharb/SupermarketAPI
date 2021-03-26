@@ -8,6 +8,11 @@ import (
 	"github.com/go-chi/render"
 )
 
+type ErrorResponse struct {
+	Message    string `json:"message"`
+	StatusCode int    `json:"-"`
+}
+
 func main() {
 	router := chi.NewRouter()
 
@@ -24,8 +29,21 @@ func main() {
 
 func handleNewItems(w http.ResponseWriter, r *http.Request) {
 	items := &ItemList{}
-	render.Bind(r, items)
-	addItems(items)
+	err := render.Bind(r, items)
+	if err != nil {
+		render.Render(w, r, &ErrorResponse{
+			Message:    err.Error(),
+			StatusCode: 400,
+		})
+		return
+	}
+	err = addItems(items)
+	if err != nil {
+		render.Render(w, r, &ErrorResponse{
+			Message:    err.Error(),
+			StatusCode: 409,
+		})
+	}
 }
 
 func handleGetItems(w http.ResponseWriter, r *http.Request) {
@@ -34,5 +52,24 @@ func handleGetItems(w http.ResponseWriter, r *http.Request) {
 
 func handleDeleteItem(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "code")
-	deleteItem(code)
+	err := deleteItem(code)
+	if err != nil {
+		switch err.(type) {
+		case *BadCodeError:
+			render.Render(w, r, &ErrorResponse{
+				Message:    err.Error(),
+				StatusCode: 400,
+			})
+		default:
+			render.Render(w, r, &ErrorResponse{
+				Message:    err.Error(),
+				StatusCode: 404,
+			})
+		}
+	}
+}
+
+func (e *ErrorResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	render.Status(r, e.StatusCode)
+	return nil
 }

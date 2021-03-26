@@ -7,12 +7,16 @@ func getItems() *ItemList {
 	return list
 }
 
-func addItems(itemList *ItemList) {
+func addItems(itemList *ItemList) error {
 	for _, item := range itemList.Items {
-		add(item)
+		error := add(item)
+		if error != nil {
+			return error
+		}
 	}
+	return nil
 }
 
-func deleteItem(code string) {
-	remove(code)
+func deleteItem(code string) error {
+	return remove(code)
 }
