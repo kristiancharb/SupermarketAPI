@@ -62,6 +62,9 @@ func (*ItemList) Render(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (list *ItemList) Bind(r *http.Request) error {
+	if len(list.Items) < 1 {
+		return fmt.Errorf("item list cannot be empty")
+	}
 	for _, item := range list.Items {
 		err := item.Bind(r)
 		if err != nil {
@@ -88,4 +91,3 @@ func (e *ItemNotFoundError) Error() string {
 func (e *ItemConflictError) Error() string {
 	return e.Code + ": " + e.Err.Error()
 }
-

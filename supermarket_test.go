@@ -28,17 +28,55 @@ func TestAddItems(t *testing.T) {
 			},
 		},
 	}
-	addItems(list)
-	expected := getInitialTestItems()
-	expected = append(expected, list.Items...)
-	compareItemsLists(t, expected, fetch())
+	err := addItems(list)
+	if err != nil {
+		t.Fatalf(`Unexpected error: %s`, err.Error())
+	}
+	for _, expected := range list.Items {
+		actual, exists := itemsByCode[expected.Code]
+		if !exists || !expected.equals(actual) {
+			t.Fatalf(`Expected: %+v Actual: %+v`, expected, actual)
+		}
+	}
+
+	err = addItems(list)
+	switch err.(type) {
+	case nil:
+		t.Fatalf(`Expected: ItemConflictError`)
+	case *ItemConflictError:
+	default:
+		t.Fatalf(`Expected: ItemConflictError`)
+	}
 }
 
 func TestDeleteItem(t *testing.T) {
 	initDb()
-	expected := getInitialTestItems()
-	deleteItem("A12T-4GH7-QPL9-3N4M")
-	compareItemsLists(t, expected[1:], fetch())
+	err := deleteItem("A12T-4GH7-QPL9-3N4M")
+	if err != nil {
+		t.Fatalf(`Unexpected error: %s`, err.Error())
+	}
+	item, exists := itemsByCode["A12T-4GH7-QPL9-3N4M"]
+	if exists {
+		t.Fatalf(`Expected: nil Actual: %+v`, item)
+	}
+
+	err = deleteItem("XXXX-XXXX-XXXX-XXXX")
+	switch err.(type) {
+	case nil:
+		t.Fatalf(`Expected: ItemNotFoundError`)
+	case *ItemNotFoundError:
+	default:
+		t.Fatalf(`Expected: ItemNotFoundError`)
+	}
+
+	err = deleteItem("XXXX")
+	switch err.(type) {
+	case nil:
+		t.Fatalf(`Expected: BadCodeError`)
+	case *BadCodeError:
+	default:
+		t.Fatalf(`Expected: BadCodeError`)
+	}
 }
 
 func TestIsValid(t *testing.T) {
