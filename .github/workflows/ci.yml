@@ -19,5 +19,11 @@ jobs:
       - name: Build container
         run: docker build -t kristiancharb/supermarket-api .
 
+      - name: Build test container
+        run: docker build -t kristiancharb/supermarket-api:test -f Dockerfile.test .
+
+      - name: Run tests
+        run: docker run kristiancharb/supermarket-api:test
+
       - name: Push to Docker hub
         run: docker push kristiancharb/supermarket-api 
