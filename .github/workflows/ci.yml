@@ -1,0 +1,23 @@
+name: CD
+
+on: [push]
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: Check out latest code
+        uses: actions/checkout@v1
+
+      - name: Login to Docker Registry
+        run: docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build container
+        run: docker build -t kristiancharb/supermarket-api .
+
+      - name: Push to Docker hub
+        run: docker push kristiancharb/supermarket-api 

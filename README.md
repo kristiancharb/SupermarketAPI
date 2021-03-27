@@ -2,25 +2,25 @@
 
 ## Running the app
 
-- Build the container
+Build the container
 ```
-docker build -t supermarket-api .
+docker build -t kristiancharb/supermarket-api .
 ```
-- Run the container in the background
+Run the container in the background
 ```
-docker run -p 8080:8080 -d supermarket-api
+docker run -p 8080:8080 -d kristiancharb/supermarket-api
 ```
-- Run the container in the foreground
+Run the container in the foreground
 ```
-docker run -p 8080:8080 -it supermarket-api
+docker run -p 8080:8080 -it kristiancharb/supermarket-api
 ```
 
 ## Running tests
 Build the testing container
 ```
-docker build -t supermarket-tests -f Dockerfile.test .
+docker build -t kristiancharb/supermarket-api:test -f Dockerfile.test .
 ```
 Run the container
 ```
-docker run supermarket-tests
+docker run kristiancharb/supermarket-api:test
 ```
