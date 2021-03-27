@@ -3,11 +3,15 @@ package main
 import (
 	"errors"
 	"strings"
+	"sync"
 )
 
 var itemsByCode map[string]*Item
+var mutex *sync.RWMutex
 
 func fetch() []Item {
+	mutex.RLock()
+	defer mutex.RUnlock()
 	var items []Item
 	for _, item := range itemsByCode {
 		items = append(items, *item)
@@ -16,11 +20,13 @@ func fetch() []Item {
 }
 
 func add(item Item) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	item.Code = strings.ToUpper(item.Code)
 	if _, exists := itemsByCode[item.Code]; exists {
 		return &ItemConflictError{
 			Code: item.Code,
-			Err: errors.New("item with code already exists"),
+			Err:  errors.New("item with code already exists"),
 		}
 	}
 	itemsByCode[item.Code] = &item
@@ -28,16 +34,18 @@ func add(item Item) error {
 }
 
 func remove(code string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	if !isValidCode(code) {
 		return &BadCodeError{
 			Code: code,
-			Err: errors.New("code is invalid"),
+			Err:  errors.New("code is invalid"),
 		}
 	}
 	if _, exists := itemsByCode[code]; !exists {
 		return &ItemNotFoundError{
 			Code: code,
-			Err: errors.New("item not found"),
+			Err:  errors.New("item not found"),
 		}
 	}
 	delete(itemsByCode, code)
@@ -67,6 +75,7 @@ func initDb() {
 			Price: 3.59,
 		},
 	}
+	mutex = &sync.RWMutex{}
 }
 
 func init() {
