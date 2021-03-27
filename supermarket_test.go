@@ -12,6 +12,27 @@ func TestGetItems(t *testing.T) {
 	compareItemsLists(t, expected, actual)
 }
 
+func TestGetItem(t *testing.T) {
+	initDb()
+	expected := getInitialTestItems()[0]
+	actual, err := getItem("A12T-4GH7-QPL9-3N4M")
+	if err != nil {
+		t.Fatalf(`Unexpected error: %s`, err.Error())
+	}
+	if !expected.equals(actual) {
+		t.Fatalf(`Expected: %+v Actual: %+v`, expected, actual)
+	}
+
+	_, err = getItem("A12T-4GH7-QPL9-3N4Z")
+	switch err.(type) {
+	case nil:
+		t.Fatalf(`Expected: ItemNotFoundError`)
+	case *ItemNotFoundError:
+	default:
+		t.Fatalf(`Expected: ItemNotFoundError`)
+	}
+}
+
 func TestAddItems(t *testing.T) {
 	initDb()
 	list := &ItemList{

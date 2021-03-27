@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"sync"
 )
 
@@ -11,6 +12,19 @@ func getItems() *ItemList {
 	list := &ItemList{}
 	list.Items = items
 	return list
+}
+
+func getItem(code string) (*Item, error) {
+	ch := make(chan *Item)
+	go fetchItem(ch, code)
+	item := <-ch
+	if item == nil {
+		return nil, &ItemNotFoundError{
+			Code: code,
+			Err:  errors.New("item not found"),
+		}
+	}
+	return item, nil
 }
 
 func addItems(itemList *ItemList) []error {

@@ -26,6 +26,7 @@ func main() {
 	router.Route("/items", func(router chi.Router) {
 		router.Post("/", handleNewItems)
 		router.Get("/", handleGetItems)
+		router.Get("/{code}", handleGetItem)
 		router.Delete("/{code}", handleDeleteItem)
 	})
 
@@ -57,6 +58,19 @@ func handleNewItems(w http.ResponseWriter, r *http.Request) {
 
 func handleGetItems(w http.ResponseWriter, r *http.Request) {
 	render.Render(w, r, getItems())
+}
+
+func handleGetItem(w http.ResponseWriter, r *http.Request) {
+	code := chi.URLParam(r, "code")
+	item, err := getItem(code)
+	if err != nil {
+		render.Render(w, r, &ErrorResponse{
+			Message:    err.Error(),
+			StatusCode: 404,
+		})
+		return
+	}
+	render.Render(w, r, item)
 }
 
 func handleDeleteItem(w http.ResponseWriter, r *http.Request) {

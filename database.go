@@ -19,6 +19,18 @@ func fetch(ch chan []Item) {
 	ch <- items
 }
 
+func fetchItem(ch chan *Item, code string) {
+	mutex.RLock()
+	defer mutex.RUnlock()
+	code = strings.ToUpper(code)
+	item, exists := itemsByCode[code]
+	if !exists {
+		ch <- nil
+		return
+	} 
+	ch <- item
+}
+
 func add(wg *sync.WaitGroup, ch chan error, item Item) {
 	mutex.Lock()
 	defer mutex.Unlock()
