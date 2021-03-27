@@ -1,22 +1,38 @@
 package main
 
+import (
+	"sync"
+)
+
 func getItems() *ItemList {
-	items := fetch()
+	ch := make(chan []Item)
+	go fetch(ch)
+	items := <-ch
 	list := &ItemList{}
 	list.Items = items
 	return list
 }
 
-func addItems(itemList *ItemList) error {
+func addItems(itemList *ItemList) []error {
+	wg := &sync.WaitGroup{}
+	ch := make(chan error, len(itemList.Items))
 	for _, item := range itemList.Items {
-		error := add(item)
-		if error != nil {
-			return error
+		wg.Add(1)
+		go add(wg, ch, item)
+	}
+	wg.Wait()
+	close(ch)
+	var errors []error
+	for err := range ch {
+		if err != nil {
+			errors = append(errors, err)
 		}
 	}
-	return nil
+	return errors
 }
 
 func deleteItem(code string) error {
-	return remove(code)
+	ch := make(chan error)
+	go remove(ch, code)
+	return <-ch
 }

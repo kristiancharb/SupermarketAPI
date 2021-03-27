@@ -9,47 +9,51 @@ import (
 var itemsByCode map[string]*Item
 var mutex *sync.RWMutex
 
-func fetch() []Item {
+func fetch(ch chan []Item) {
 	mutex.RLock()
 	defer mutex.RUnlock()
 	var items []Item
 	for _, item := range itemsByCode {
 		items = append(items, *item)
 	}
-	return items
+	ch <- items
 }
 
-func add(item Item) error {
+func add(wg *sync.WaitGroup, ch chan error, item Item) {
 	mutex.Lock()
 	defer mutex.Unlock()
+	defer wg.Done()
 	item.Code = strings.ToUpper(item.Code)
 	if _, exists := itemsByCode[item.Code]; exists {
-		return &ItemConflictError{
+		ch <- &ItemConflictError{
 			Code: item.Code,
 			Err:  errors.New("item with code already exists"),
 		}
+		return
 	}
 	itemsByCode[item.Code] = &item
-	return nil
 }
 
-func remove(code string) error {
+func remove(ch chan error, code string) {
 	mutex.Lock()
 	defer mutex.Unlock()
+	code = strings.ToUpper(code)
 	if !isValidCode(code) {
-		return &BadCodeError{
+		ch <- &BadCodeError{
 			Code: code,
 			Err:  errors.New("code is invalid"),
 		}
+		return
 	}
 	if _, exists := itemsByCode[code]; !exists {
-		return &ItemNotFoundError{
+		ch <- &ItemNotFoundError{
 			Code: code,
 			Err:  errors.New("item not found"),
 		}
+		return
 	}
 	delete(itemsByCode, code)
-	return nil
+	ch <- nil
 }
 
 func initDb() {

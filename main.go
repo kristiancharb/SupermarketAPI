@@ -13,6 +13,11 @@ type ErrorResponse struct {
 	StatusCode int    `json:"-"`
 }
 
+type MultipleErrorResponse struct {
+	Errors     []string `json:"errors"`
+	StatusCode int      `json:"-"`
+}
+
 func main() {
 	router := chi.NewRouter()
 
@@ -28,8 +33,8 @@ func main() {
 }
 
 func handleNewItems(w http.ResponseWriter, r *http.Request) {
-	items := &ItemList{}
-	err := render.Bind(r, items)
+	itemList := &ItemList{}
+	err := render.Bind(r, itemList)
 	if err != nil {
 		render.Render(w, r, &ErrorResponse{
 			Message:    err.Error(),
@@ -37,11 +42,15 @@ func handleNewItems(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	err = addItems(items)
-	if err != nil {
-		render.Render(w, r, &ErrorResponse{
-			Message:    err.Error(),
-			StatusCode: 409,
+	errors := addItems(itemList)
+	statusCode := 200
+	if len(errors) == len(itemList.Items) {
+		statusCode = 409
+	}
+	if len(errors) > 0 {
+		render.Render(w, r, &MultipleErrorResponse{
+			Errors:     getErrorMessages(errors),
+			StatusCode: statusCode,
 		})
 	}
 }
@@ -72,4 +81,17 @@ func handleDeleteItem(w http.ResponseWriter, r *http.Request) {
 func (e *ErrorResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	render.Status(r, e.StatusCode)
 	return nil
+}
+
+func (e *MultipleErrorResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	render.Status(r, e.StatusCode)
+	return nil
+}
+
+func getErrorMessages(errors []error) []string {
+	var messages []string
+	for _, err := range errors {
+		messages = append(messages, err.Error())
+	}
+	return messages
 }
