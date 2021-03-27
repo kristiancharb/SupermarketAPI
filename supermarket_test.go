@@ -28,9 +28,9 @@ func TestAddItems(t *testing.T) {
 			},
 		},
 	}
-	err := addItems(list)
-	if err != nil {
-		t.Fatalf(`Unexpected error: %s`, err.Error())
+	errors := addItems(list)
+	if len(errors) > 0 {
+		t.Fatalf(`Unexpected errors: %+v`, errors)
 	}
 	for _, expected := range list.Items {
 		actual, exists := itemsByCode[expected.Code]
@@ -39,13 +39,15 @@ func TestAddItems(t *testing.T) {
 		}
 	}
 
-	err = addItems(list)
-	switch err.(type) {
-	case nil:
-		t.Fatalf(`Expected: ItemConflictError`)
-	case *ItemConflictError:
-	default:
-		t.Fatalf(`Expected: ItemConflictError`)
+	errors = addItems(list)
+	for _, err := range errors {
+		switch err.(type) {
+		case nil:
+			t.Fatalf(`Expected: ItemConflictError`)
+		case *ItemConflictError:
+		default:
+			t.Fatalf(`Expected: ItemConflictError`)
+		}
 	}
 }
 
