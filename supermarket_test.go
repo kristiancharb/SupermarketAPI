@@ -14,6 +14,7 @@ func TestGetItems(t *testing.T) {
 
 func TestGetItem(t *testing.T) {
 	initDb()
+	// Test valid request
 	expected := getInitialTestItems()[0]
 	actual, err := getItem("A12T-4GH7-QPL9-3N4M")
 	if err != nil {
@@ -23,6 +24,7 @@ func TestGetItem(t *testing.T) {
 		t.Fatalf(`Expected: %+v Actual: %+v`, expected, actual)
 	}
 
+	// Test nonexistant produce code
 	_, err = getItem("A12T-4GH7-QPL9-3N4Z")
 	switch err.(type) {
 	case nil:
@@ -49,6 +51,7 @@ func TestAddItems(t *testing.T) {
 			},
 		},
 	}
+	// Test valid request 
 	errors := addItems(list)
 	if len(errors) > 0 {
 		t.Fatalf(`Unexpected errors: %+v`, errors)
@@ -60,6 +63,7 @@ func TestAddItems(t *testing.T) {
 		}
 	}
 
+	//Test inserting duplicate produce codes
 	errors = addItems(list)
 	for _, err := range errors {
 		switch err.(type) {
@@ -74,6 +78,7 @@ func TestAddItems(t *testing.T) {
 
 func TestDeleteItem(t *testing.T) {
 	initDb()
+	// Test valid request
 	err := deleteItem("A12T-4GH7-QPL9-3N4M")
 	if err != nil {
 		t.Fatalf(`Unexpected error: %s`, err.Error())
@@ -83,6 +88,7 @@ func TestDeleteItem(t *testing.T) {
 		t.Fatalf(`Expected: nil Actual: %+v`, item)
 	}
 
+	// Test deleting non-existant produce code 
 	err = deleteItem("XXXX-XXXX-XXXX-XXXX")
 	switch err.(type) {
 	case nil:
@@ -92,6 +98,7 @@ func TestDeleteItem(t *testing.T) {
 		t.Fatalf(`Expected: ItemNotFoundError`)
 	}
 
+	// Test deleting invalid produce code
 	err = deleteItem("XXXX")
 	switch err.(type) {
 	case nil:
@@ -119,6 +126,7 @@ func TestIsValid(t *testing.T) {
 	checkCodes(t, invalidCodes, false)
 }
 
+// Helper for checking item lists have the same values (order doesn't matter)
 func compareItemsLists(t *testing.T, expected, actual []Item) {
 	sort.SliceStable(expected, func(i, j int) bool {
 		return expected[i].Code < expected[j].Code
@@ -133,6 +141,7 @@ func compareItemsLists(t *testing.T, expected, actual []Item) {
 	}
 }
 
+// Helper for checking multiple produce codes
 func checkCodes(t *testing.T, codes []string, expected bool) {
 	for _, code := range codes {
 		if isValid := isValidCode(code); isValid != expected {
@@ -141,6 +150,7 @@ func checkCodes(t *testing.T, codes []string, expected bool) {
 	}
 }
 
+// Get initial produce items
 func getInitialTestItems() []Item {
 	items := []Item{
 		{

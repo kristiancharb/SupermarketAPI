@@ -28,6 +28,7 @@ func getItem(code string) (*Item, error) {
 }
 
 func addItems(itemList *ItemList) []error {
+	// Use WaitGroup to sync goroutines for each produce item
 	wg := &sync.WaitGroup{}
 	ch := make(chan error, len(itemList.Items))
 	for _, item := range itemList.Items {
@@ -35,6 +36,7 @@ func addItems(itemList *ItemList) []error {
 		go add(wg, ch, item)
 	}
 	wg.Wait()
+	// Ensure we don't wait for more data when all routines finish
 	close(ch)
 	var errors []error
 	for err := range ch {

@@ -6,7 +6,10 @@ import (
 	"sync"
 )
 
+// Global item store
 var itemsByCode map[string]*Item
+
+// Sync access to global item store
 var mutex *sync.RWMutex
 
 func fetch(ch chan []Item) {
@@ -27,7 +30,7 @@ func fetchItem(ch chan *Item, code string) {
 	if !exists {
 		ch <- nil
 		return
-	} 
+	}
 	ch <- item
 }
 
@@ -69,6 +72,7 @@ func remove(ch chan error, code string) {
 }
 
 func initDb() {
+	// Add initial produce items to item store
 	itemsByCode = map[string]*Item{
 		"A12T-4GH7-QPL9-3N4M": {
 			Code:  "A12T-4GH7-QPL9-3N4M",

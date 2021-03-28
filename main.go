@@ -8,11 +8,13 @@ import (
 	"github.com/go-chi/render"
 )
 
+// Error response for single error
 type ErrorResponse struct {
 	Message    string `json:"message"`
 	StatusCode int    `json:"-"`
 }
 
+// Error response for multiple errors (e.g. adding multiple conflicting items)
 type MultipleErrorResponse struct {
 	Errors     []string `json:"errors"`
 	StatusCode int      `json:"-"`
@@ -21,6 +23,7 @@ type MultipleErrorResponse struct {
 func main() {
 	router := chi.NewRouter()
 
+    // Recover after failed request
 	router.Use(middleware.Recoverer)
 
 	router.Route("/items", func(router chi.Router) {
@@ -46,9 +49,11 @@ func handleNewItems(w http.ResponseWriter, r *http.Request) {
 	errors := addItems(itemList)
 	statusCode := 200
 	if len(errors) == len(itemList.Items) {
+        // No items were successfully inserted
 		statusCode = 409
 	}
 	if len(errors) > 0 {
+        // At least one error occurred when inserting items
 		render.Render(w, r, &MultipleErrorResponse{
 			Errors:     getErrorMessages(errors),
 			StatusCode: statusCode,
@@ -102,6 +107,7 @@ func (e *MultipleErrorResponse) Render(w http.ResponseWriter, r *http.Request) e
 	return nil
 }
 
+// Flatten []error into []string for multiple error response
 func getErrorMessages(errors []error) []string {
 	var messages []string
 	for _, err := range errors {
