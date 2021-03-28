@@ -16,7 +16,7 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build container
+      - name: Build app container
         run: docker build -t kristiancharb/supermarket-api .
 
       - name: Build test container
@@ -25,5 +25,8 @@ jobs:
       - name: Run tests
         run: docker run kristiancharb/supermarket-api:test
 
-      - name: Push to Docker hub
+      - name: Push app container to Docker hub
         run: docker push kristiancharb/supermarket-api 
+      
+      - name: Push test container to Docker hub
+        run: docker push kristiancharb/supermarket-api:test
