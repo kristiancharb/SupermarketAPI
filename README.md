@@ -37,8 +37,8 @@ docker run kristiancharb/supermarket-api:test
 | Method | Path          | Response                                                                                                                                                                                                                                                                                                                                              |
 |--------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | GET    | /items        | Returns an object containing an items array with all items.                                                                                                                                                                                                                                                                                           |
-| GET    | /items/{code} | Returns an object containing the request produce code, name and price.<br>Returns status 404 if code is invalid or doesn't exist in database.                                                                                                                                                                                                         |
-| POST   | /items        | Inserts all items in post body array into the database.<br>Returns a 200 status code if at least one item is successfully inserted.<br>Returns a 400 status code if at least one item in array is invalid (see POST body*)<br>Returns an array of errors if insertion of at least one item fails.<br>Returns a 409 status code if insertion of all items fails. |
+| GET    | /items/{code} | Returns an object containing the requested produce code, name and price.<br>Returns status 404 if code is invalid or doesn't exist in database.                                                                                                                                                                                                         |
+| POST   | /items        | Inserts all items in post body array into the database.<br>Returns a 200 status code if at least one item is successfully inserted.<br>Returns a 400 status code if at least one item in array is invalid (see POST body*)<br>Returns an array of errors if insertion of at least one item fails (duplicate produce code).<br>Returns a 409 status code if insertion of all items fails. |
 | DELETE | /items/{code} | Deletes the item with provided code from the database.<br>Returns a 400 status code if code is invalid. <br>Returns 404 status code if item with code isn't found.                                                                                                                                                                                    |
 
 **/items  POST Body**
@@ -49,7 +49,8 @@ docker run kristiancharb/supermarket-api:test
             "code": "ABC4-HJC9-SKL9-21KD",
             "name": "Bread",
             "price": 3.46
-        },
+        }, 
+        ...
     ]
 }
 ```
@@ -64,10 +65,10 @@ docker run kristiancharb/supermarket-api:test
     - Service functions return any errors that come up when accessing item store
     - Handles concurrency i.e. spawning goroutines to access item store 
 - [database.go](https://github.com/kristiancharb/SupermarketAPI/blob/main/database.go)
-    - Contains item store and functions that access/modify item store 
-    - Functions send data to caller through passed in channels
+    - Contains item store and functions to access/modify item store 
+    - Functions send data to caller through channels
 - [item.go](https://github.com/kristiancharb/SupermarketAPI/blob/main/item.go)
-    - Structs used for storage and request/response payloads
+    - Contains structs used for storage and request/response payloads
     - Helper functions for validating items
 - [supermarket_test.go](https://github.com/kristiancharb/SupermarketAPI/blob/main/supermarket_test.go)
     - Unit tests for service functions and other helper functions 
@@ -77,6 +78,7 @@ docker run kristiancharb/supermarket-api:test
 - github.com/go-chi/render: Provides helpers for decoding request payloads into structs and encoding structs into response payloads
 
 ## Continuous Integration Pipeline
+- Uses GitHub Actions
 - Defined in [ci.yml](https://github.com/kristiancharb/SupermarketAPI/blob/main/.github/workflows/ci.yml)
 - On push to main:
     - Builds app container
