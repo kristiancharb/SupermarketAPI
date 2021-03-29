@@ -126,6 +126,40 @@ func TestIsValid(t *testing.T) {
 	checkCodes(t, invalidCodes, false)
 }
 
+func TestIsValidCode(t *testing.T) {
+	validCodes := []string{
+		"A12T-4GH7-QPL9-3N4M",
+		"A12t-4Gh7-QPl9-3N4m",
+		"1111-1111-1111-1111",
+		"HHHH-HHHH-HHHH-HHHH",
+	}
+	invalidCodes := []string{
+		"A12-4GH7-QPL9-3N4M",
+		"A12T4GH7-QPL9-3N4M",
+		"A12T-4GH7-QPL9-3N4MS",
+		"A12?-4GH7-QPL9-3N4MS",
+	}
+	checkCodes(t, validCodes, true)
+	checkCodes(t, invalidCodes, false)
+}
+
+func TestIsValidPrice(t *testing.T) {
+	// Test valid prices
+	prices := []float64{0.99, 3.22, 3, 25.2}
+	for _, price := range prices {
+		if !isValidPrice(price) {
+			t.Fatalf(`%f -> Expected: %t Actual: %t`, price, true, false)
+		}
+	}
+	// Test invalid prices
+	prices = []float64{0.999, 22.23029, 22.001}
+	for _, price := range prices {
+		if isValidPrice(price) {
+			t.Fatalf(`%f -> Expected: %t Actual: %t`, price, false, true)
+		}
+	}
+}
+
 // Helper for checking item lists have the same values (order doesn't matter)
 func compareItemsLists(t *testing.T, expected, actual []Item) {
 	sort.SliceStable(expected, func(i, j int) bool {

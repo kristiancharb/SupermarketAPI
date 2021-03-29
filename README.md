@@ -99,5 +99,3 @@ docker run kristiancharb/supermarket-api:test
     - Currently we return an error for each "bad" produce item but don't specifically acknowledge the items that were inserted
     - It might be clearer to specify which produce codes were successfully inserted (if any) in the response
     - If we were using an actual database it might be more intuitive to rollback successful insertions if there were any "bad" produce items 
-- Validate price values
-    - Should have the right amount of decimal places

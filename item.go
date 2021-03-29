@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"regexp"
 )
@@ -50,6 +51,9 @@ func (item *Item) Bind(r *http.Request) error {
 	if !isValidCode(item.Code) {
 		return fmt.Errorf("code is invalid")
 	}
+	if !isValidPrice(item.Price) {
+		return fmt.Errorf("price can have at most 2 decimal places")
+	}
 	return nil
 }
 
@@ -93,6 +97,15 @@ func isValidCode(code string) bool {
 	codePattern := "^(?:[A-Za-z0-9]{4}-){3}[A-Za-z0-9]{4}$"
 	matched, _ := regexp.MatchString(codePattern, code)
 	return matched
+}
+
+// Checks that the price float has the valid precision
+func isValidPrice(price float64) bool {
+	// Arbitrary threshold for float comparison
+	threshold := 1e-9
+	// Price with digits after "cents place" removed
+	expectedPrecisionPrice := math.Floor(price*100) / 100
+	return math.Abs(price-expectedPrecisionPrice) < threshold
 }
 
 func (e *BadCodeError) Error() string {
