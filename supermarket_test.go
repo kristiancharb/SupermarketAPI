@@ -109,23 +109,6 @@ func TestDeleteItem(t *testing.T) {
 	}
 }
 
-func TestIsValid(t *testing.T) {
-	validCodes := []string{
-		"A12T-4GH7-QPL9-3N4M",
-		"A12t-4Gh7-QPl9-3N4m",
-		"1111-1111-1111-1111",
-		"HHHH-HHHH-HHHH-HHHH",
-	}
-	invalidCodes := []string{
-		"A12-4GH7-QPL9-3N4M",
-		"A12T4GH7-QPL9-3N4M",
-		"A12T-4GH7-QPL9-3N4MS",
-		"A12?-4GH7-QPL9-3N4MS",
-	}
-	checkCodes(t, validCodes, true)
-	checkCodes(t, invalidCodes, false)
-}
-
 func TestIsValidCode(t *testing.T) {
 	validCodes := []string{
 		"A12T-4GH7-QPL9-3N4M",
